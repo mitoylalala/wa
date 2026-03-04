@@ -1,73 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Document Viewer</title>
+  <title>Document Image</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0d47a1;
+    html, body {
       margin: 0;
       padding: 0;
-      text-align: center;
-      color: white;
-    }
-
-    .container {
-      margin-top: 50px;
-    }
-
-    input {
-      padding: 10px;
-      width: 250px;
-      border-radius: 6px;
-      border: none;
-      outline: none;
-    }
-
-    button {
-      padding: 10px 15px;
-      border: none;
-      border-radius: 6px;
-      background: #2196f3;
-      color: white;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-
-    button:hover {
-      background: #1976d2;
-    }
-
-    .card {
-      margin-top: 30px;
-      background: white;
-      color: black;
-      display: inline-block;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
+      background: #0d47a1;
+      height: 100%;
+      overflow: hidden; /* NO SCROLL */
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     img {
-      width: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
       border-radius: 10px;
-      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="container">
-    <h2>📄 Document Viewer</h2>
-
-    <input type="text" id="searchID" placeholder="Enter Document ID">
-    <button onclick="searchDocument()">Search</button>
-
-    <div id="result"></div>
-  </div>
+  <img id="docImage" />
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
@@ -86,39 +46,24 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    window.searchDocument = function () {
+    // GET ID FROM URL
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
 
-      const id = document.getElementById("searchID").value;
-      const resultDiv = document.getElementById("result");
+    if (id) {
+      const imageRef = ref(db, "documents/" + id + "/image");
 
-      if (!id) {
-        alert("Enter Document ID");
-        return;
-      }
-
-      const docRef = ref(db, "documents/" + id);
-
-      onValue(docRef, (snapshot) => {
-
+      onValue(imageRef, (snapshot) => {
         if (snapshot.exists()) {
-          const data = snapshot.val();
-
-          resultDiv.innerHTML = `
-            <div class="card">
-              <h3>Document ID: ${id}</h3>
-              <p><b>Title:</b> ${data.title || ""}</p>
-              <p><b>Status:</b> ${data.status || ""}</p>
-              <p><b>Handler:</b> ${data.handler || ""}</p>
-              <img src="${data.image || ""}" />
-            </div>
-          `;
+          document.getElementById("docImage").src = snapshot.val();
         } else {
-          resultDiv.innerHTML = "<p>Document not found.</p>";
+          document.body.innerHTML = "<h2 style='color:white'>No Image Found</h2>";
         }
-
       });
-
+    } else {
+      document.body.innerHTML = "<h2 style='color:white'>No Document ID</h2>";
     }
+
   </script>
 
 </body>
