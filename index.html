@@ -1,29 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
   <title>Document Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: linear-gradient(to right, #0d47a1, #1976d2);
-      color: white;
+      background: #0d47a1;
+      margin: 0;
+      padding: 0;
       text-align: center;
-      padding: 40px;
+      color: white;
     }
 
-    h1 {
-      margin-bottom: 30px;
-    }
-
-    .search-box {
-      margin-bottom: 30px;
+    .container {
+      margin-top: 50px;
     }
 
     input {
-      padding: 12px;
+      padding: 10px;
       width: 250px;
       border-radius: 6px;
       border: none;
@@ -31,106 +27,99 @@
     }
 
     button {
-      padding: 12px 20px;
-      border-radius: 6px;
+      padding: 10px 15px;
       border: none;
-      background-color: #1565c0;
+      border-radius: 6px;
+      background: #2196f3;
       color: white;
       cursor: pointer;
-      margin-left: 10px;
-      font-weight: bold;
+      margin-left: 5px;
     }
 
     button:hover {
-      background-color: #0d47a1;
+      background: #1976d2;
     }
 
     .card {
-      background-color: rgba(255,255,255,0.1);
-      padding: 25px;
-      border-radius: 12px;
+      margin-top: 30px;
+      background: white;
+      color: black;
       display: inline-block;
-      min-width: 300px;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
     }
 
     img {
-      margin-top: 20px;
-      max-width: 300px;
+      width: 100%;
       border-radius: 10px;
-      display: none;
+      margin-top: 10px;
     }
-
-    .info {
-      margin-top: 15px;
-      font-size: 18px;
-    }
-
   </style>
 </head>
+
 <body>
 
-<h1>📄 Document Image Viewer</h1>
+  <div class="container">
+    <h2>📄 Document Viewer</h2>
 
-<div class="search-box">
-  <input type="text" id="docId" placeholder="Enter Document ID">
-  <button onclick="searchDocument()">Search</button>
-</div>
+    <input type="text" id="searchID" placeholder="Enter Document ID">
+    <button onclick="searchDocument()">Search</button>
 
-<div class="card">
-  <div class="info" id="title"></div>
-  <div class="info" id="status"></div>
-  <img id="image">
-</div>
+    <div id="result"></div>
+  </div>
 
-<!-- Firebase v8 -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-database.js";
 
-<script>
-  // 🔴 REPLACE WITH YOUR FIREBASE CONFIG
-  var firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyDlYlQwE5Cv7ve7hvoQ9rpWf_xhd0FDCDs",
+      authDomain: "trackingsystem-dea7b.firebaseapp.com",
+      databaseURL: "https://trackingsystem-dea7b-default-rtdb.firebaseio.com",
+      projectId: "trackingsystem-dea7b",
+      storageBucket: "trackingsystem-dea7b.firebasestorage.app",
+      messagingSenderId: "1007626152785",
+      appId: "1:1007626152785:web:a567ca49ef74d1bfa00170"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  var database = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  function searchDocument() {
-    var id = document.getElementById("docId").value.trim();
+    window.searchDocument = function () {
 
-    if(id === "") {
-      alert("Please enter Document ID");
-      return;
-    }
+      const id = document.getElementById("searchID").value;
+      const resultDiv = document.getElementById("result");
 
-    database.ref("documents/" + id).on("value", function(snapshot) {
-
-      if(snapshot.exists()) {
-        var data = snapshot.val();
-
-        document.getElementById("title").innerText = "Title: " + (data.title || "");
-        document.getElementById("status").innerText = "Status: " + (data.status || "");
-
-        if(data.image) {
-          document.getElementById("image").src = data.image;
-          document.getElementById("image").style.display = "block";
-        } else {
-          document.getElementById("image").style.display = "none";
-        }
-
-      } else {
-        document.getElementById("title").innerText = "Document not found";
-        document.getElementById("status").innerText = "";
-        document.getElementById("image").style.display = "none";
+      if (!id) {
+        alert("Enter Document ID");
+        return;
       }
 
-    });
-  }
-</script>
+      const docRef = ref(db, "documents/" + id);
+
+      onValue(docRef, (snapshot) => {
+
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+
+          resultDiv.innerHTML = `
+            <div class="card">
+              <h3>Document ID: ${id}</h3>
+              <p><b>Title:</b> ${data.title || ""}</p>
+              <p><b>Status:</b> ${data.status || ""}</p>
+              <p><b>Handler:</b> ${data.handler || ""}</p>
+              <img src="${data.image || ""}" />
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = "<p>Document not found.</p>";
+        }
+
+      });
+
+    }
+  </script>
 
 </body>
 </html>
