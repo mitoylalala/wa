@@ -1,29 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue Themed Image Viewer</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <title>Document Viewer</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #0d47a1, #1976d2);
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+    }
+
+    .search-box {
+      margin-bottom: 30px;
+    }
+
+    input {
+      padding: 12px;
+      width: 250px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 6px;
+      border: none;
+      background-color: #1565c0;
+      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0d47a1;
+    }
+
+    .card {
+      background-color: rgba(255,255,255,0.1);
+      padding: 25px;
+      border-radius: 12px;
+      display: inline-block;
+      min-width: 300px;
+    }
+
+    img {
+      margin-top: 20px;
+      max-width: 300px;
+      border-radius: 10px;
+      display: none;
+    }
+
+    .info {
+      margin-top: 15px;
+      font-size: 18px;
+    }
+
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>MIT App Inventor Image Viewer</h1>
-        <p>Enter the Document ID you saved in the Realtime Database and click View Image.</p>
-        <div class="input-group">
-            <input type="text" id="docId" placeholder="Document ID">
-            <button id="viewBtn">View Image</button>
-        </div>
-        <div id="imageWrapper" class="hidden">
-            <button id="closeBtn" class="close">×</button>
-            <img id="displayedImage" src="" alt="Viewed"/>
-        </div>
-    </div>
 
-    <!-- Firebase SDKs (will need actual config from your project) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    
-    <script src="script.js"></script>
+<h1>📄 Document Image Viewer</h1>
+
+<div class="search-box">
+  <input type="text" id="docId" placeholder="Enter Document ID">
+  <button onclick="searchDocument()">Search</button>
+</div>
+
+<div class="card">
+  <div class="info" id="title"></div>
+  <div class="info" id="status"></div>
+  <img id="image">
+</div>
+
+<!-- Firebase v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+  // 🔴 REPLACE WITH YOUR FIREBASE CONFIG
+  var firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  var database = firebase.database();
+
+  function searchDocument() {
+    var id = document.getElementById("docId").value.trim();
+
+    if(id === "") {
+      alert("Please enter Document ID");
+      return;
+    }
+
+    database.ref("documents/" + id).on("value", function(snapshot) {
+
+      if(snapshot.exists()) {
+        var data = snapshot.val();
+
+        document.getElementById("title").innerText = "Title: " + (data.title || "");
+        document.getElementById("status").innerText = "Status: " + (data.status || "");
+
+        if(data.image) {
+          document.getElementById("image").src = data.image;
+          document.getElementById("image").style.display = "block";
+        } else {
+          document.getElementById("image").style.display = "none";
+        }
+
+      } else {
+        document.getElementById("title").innerText = "Document not found";
+        document.getElementById("status").innerText = "";
+        document.getElementById("image").style.display = "none";
+      }
+
+    });
+  }
+</script>
+
 </body>
 </html>
