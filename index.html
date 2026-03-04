@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blue Themed Image Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>MIT App Inventor Image Viewer</h1>
+        <p>Enter the Document ID you saved in the Realtime Database and click View Image.</p>
+        <div class="input-group">
+            <input type="text" id="docId" placeholder="Document ID">
+            <button id="viewBtn">View Image</button>
+        </div>
+        <div id="imageWrapper" class="hidden">
+            <button id="closeBtn" class="close">×</button>
+            <img id="displayedImage" src="" alt="Viewed"/>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs (will need actual config from your project) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
